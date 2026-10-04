@@ -1,0 +1,142 @@
+---
+import { country } from "../lib/format";
+import type { Store } from "../lib/types";
+
+interface Props {
+  store: Store;
+}
+const { store } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <p class="footer__claim">{store.tagline}</p>
+    </div>
+
+    <div class="footer__grid">
+      <div>
+        <span class="eyebrow">Shop</span>
+        <a href="/shop/?section=women">Women</a>
+        <a href="/shop/?section=men">Men</a>
+        <a href="/shop/?section=accessories">Accessories</a>
+        <a href="/shop/?new=1">New in</a>
+        <a href="/collections/">Collections</a>
+      </div>
+      <div>
+        <span class="eyebrow">Help</span>
+        <a href="/account/">Orders and returns</a>
+        <a href="/about/#care">Caring for your clothes</a>
+        <a href="/store/#services">Delivery and collection</a>
+        <a href={`mailto:${store.email}`}>{store.email}</a>
+      </div>
+      <div>
+        <span class="eyebrow">Store</span>
+        <address>
+          {store.address}<br />
+          {store.postal_code} {store.city}<br />
+          {country(store.country)}
+        </address>
+        <p class="muted">{store.opening_hours}</p>
+      </div>
+      <div>
+        <span class="eyebrow">About</span>
+        <a href="/about/">The atelier</a>
+        <a href="/store/">Visit the store</a>
+        <p class="muted footer__note">
+          Photographs from <a href="https://unsplash.com" rel="noopener">Unsplash</a>, credited on every page where they appear.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span class="footer__logo">{store.name}</span>
+      <span class="muted">© {year} {store.name}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: clamp(80px, 10vw, 140px);
+    padding-block: clamp(56px, 7vw, 96px) 32px;
+    background: var(--paper-sunken);
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  .footer__claim {
+    max-width: 18ch;
+    font-family: var(--display);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.05;
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+    margin-top: clamp(48px, 6vw, 80px);
+  }
+
+  .footer__grid > div {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+  }
+
+  .footer__grid .eyebrow {
+    margin-bottom: 6px;
+  }
+
+  .footer__grid a {
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+
+  .footer__grid a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  address {
+    font-style: normal;
+    color: var(--ink-soft);
+  }
+
+  .footer__note {
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+
+  .footer__note a {
+    text-decoration: underline;
+  }
+
+  .footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-top: clamp(56px, 8vw, 96px);
+    padding-top: 20px;
+    border-top: 1px solid var(--line-strong);
+    font-size: 12px;
+  }
+
+  .footer__logo {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 760px) {
+    .footer__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+import Base from "../../layouts/Base.astro";
+import { catalog } from "../../lib/catalog";
+import { img, srcset } from "../../lib/image";
+
+const { collections } = await catalog();
+---
+
+<Base title="Collections" description="Curated edits for the season.">
+  <section class="wrap page">
+    <header class="page__head">
+      <span class="eyebrow">Collections</span>
+      <h1>Edits for <em>the season</em></h1>
+      <p class="lede">Small groups of pieces chosen to be worn together, from the first cold mornings to the long evenings of summer.</p>
+    </header>
+
+    <div class="list">
+      {
+        collections.map((c, i) => (
+          <a class:list={["item", { "item--flip": i % 2 === 1 }]} href={`/collections/${c.slug}/`} data-reveal>
+            <div class="item__photo photo">
+              <img
+                src={img(c.image.url, 1000, 1250)}
+                srcset={srcset(c.image.url, [600, 1000, 1400], 4 / 5)}
+                sizes="(max-width: 900px) 92vw, 50vw"
+                alt={c.alt}
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            </div>
+            <div class="item__copy">
+              <span class="eyebrow">
+                0{i + 1} · {c.product_count} pieces
+              </span>
+              <h2>{c.title}</h2>
+              <p class="item__sub">{c.subtitle}</p>
+              <p class="lede">{c.description}</p>
+              <span class="link">Explore the edit</span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page {
+    padding-top: clamp(40px, 6vw, 88px);
+  }
+
+  .page__head {
+    display: grid;
+    gap: 18px;
+    max-width: 760px;
+    margin-bottom: clamp(48px, 7vw, 104px);
+  }
+
+  .list {
+    display: grid;
+    gap: clamp(64px, 9vw, 140px);
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .item--flip .item__photo {
+    order: 2;
+  }
+
+  .item__photo {
+    aspect-ratio: 4 / 5;
+  }
+
+  .item__photo img {
+    transition: transform 1.6s var(--ease);
+  }
+
+  .item:hover .item__photo img {
+    transform: scale(1.03);
+  }
+
+  .item__copy {
+    display: grid;
+    gap: 18px;
+    justify-items: start;
+  }
+
+  .item__sub {
+    font-family: var(--display);
+    font-size: 24px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 900px) {
+    .item {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .item--flip .item__photo {
+      order: 0;
+    }
+  }
+</style>

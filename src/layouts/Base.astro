@@ -1,0 +1,52 @@
+---
+import "../styles/global.css";
+import BagDrawer from "../components/BagDrawer.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { catalog } from "../lib/catalog";
+import { img } from "../lib/image";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const { store } = await catalog();
+const { title, description = store.tagline, image } = Astro.props;
+const pageTitle = title ? `${title} | ${store.name}` : `${store.name}: ${store.tagline}`;
+---
+
+<!doctype html>
+<html lang="en" data-currency={store.currency}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <meta name="theme-color" content="#f6f2eb" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    {image && <meta property="og:image" content={img(image, 1200, 630)} />}
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
+  </head>
+  <body>
+    <a class="visually-hidden" href="#main">Skip to content</a>
+    <Header store={store} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer store={store} />
+    <BagDrawer store={store} />
+    <script>
+      import { initBagUi } from "../scripts/bag-ui";
+      import { initReveal } from "../scripts/reveal";
+      initBagUi();
+      initReveal();
+    </script>
+  </body>
+</html>

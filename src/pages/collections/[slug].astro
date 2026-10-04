@@ -1,0 +1,167 @@
+---
+import Base from "../../layouts/Base.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { catalog } from "../../lib/catalog";
+import { img, srcset } from "../../lib/image";
+import type { Collection } from "../../lib/types";
+
+export async function getStaticPaths() {
+  const { collections } = await catalog();
+  return collections.map((collection) => ({ params: { slug: collection.slug }, props: { collection } }));
+}
+
+interface Props {
+  collection: Collection;
+}
+
+const { collection: c } = Astro.props;
+const { store, products, collections } = await catalog();
+const items = products.filter((p) => p.collections.includes(c.slug));
+const others = collections.filter((o) => o.slug !== c.slug);
+---
+
+<Base title={c.title} description={c.description} image={c.image.url}>
+  <section class="cover">
+    <div class="cover__photo photo">
+      <img src={img(c.image.url, 1800, 1000, 78)} srcset={srcset(c.image.url, [900, 1400, 2000, 2600], 1.8, 78)} sizes="100vw" alt={c.alt} fetchpriority="high" />
+    </div>
+    <div class="wrap cover__copy">
+      <span class="eyebrow">The edit</span>
+      <h1>{c.title}</h1>
+      <p class="cover__sub">{c.subtitle}</p>
+    </div>
+    <p class="credit cover__credit">Photo: <a href={c.image.photographer_url}>{c.image.photographer}</a> on <a href={c.image.source_url}>Unsplash</a></p>
+  </section>
+
+  <section class="wrap intro">
+    <p class="intro__text">{c.description}</p>
+    <span class="muted">{items.length} pieces</span>
+  </section>
+
+  <section class="wrap grid">
+    {items.map((p, i) => <ProductCard product={p} currency={store.currency} eager={i < 4} />)}
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <span class="eyebrow">More edits</span>
+      <div class="others">
+        {
+          others.map((o) => (
+            <a href={`/collections/${o.slug}/`} class="other">
+              <span class="other__title">{o.title}</span>
+              <span class="muted">{o.subtitle}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .cover {
+    position: relative;
+    display: grid;
+    align-items: end;
+    min-height: min(82vh, 820px);
+    color: var(--paper);
+  }
+
+  .cover__photo {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cover__photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(20 18 16 / 0.55), transparent 55%);
+  }
+
+  .cover__copy {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    padding-bottom: clamp(40px, 6vw, 80px);
+  }
+
+  .cover__copy .eyebrow {
+    color: rgb(246 242 235 / 0.8);
+  }
+
+  .cover__copy h1 {
+    font-size: clamp(56px, 9vw, 140px);
+    font-weight: 300;
+  }
+
+  .cover__sub {
+    font-family: var(--display);
+    font-size: clamp(22px, 2.4vw, 32px);
+    font-style: italic;
+  }
+
+  .cover__credit {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 16px;
+    color: rgb(246 242 235 / 0.7);
+  }
+
+  .intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 32px;
+    padding-block: clamp(48px, 7vw, 96px) clamp(32px, 4vw, 56px);
+  }
+
+  .intro__text {
+    max-width: 30ch;
+    font-family: var(--display);
+    font-size: clamp(26px, 3vw, 40px);
+    line-height: 1.2;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(32px, 4vw, 56px) clamp(12px, 1.6vw, 24px);
+  }
+
+  .others {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  .other {
+    display: grid;
+    gap: 6px;
+    padding-top: 20px;
+    border-top: 1px solid var(--ink);
+    text-decoration: none;
+  }
+
+  .other__title {
+    font-family: var(--display);
+    font-size: 30px;
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .others {
+      grid-template-columns: 1fr;
+    }
+
+    .intro {
+      flex-direction: column;
+      align-items: start;
+    }
+  }
+</style>

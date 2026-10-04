@@ -1,0 +1,54 @@
+---
+/**
+ * A photo from the Unsplash CDN, cropped to an aspect ratio, with a srcset
+ * and an optional credit line underneath.
+ */
+import { img, srcset } from "../lib/image";
+import type { Photo } from "../lib/types";
+
+interface Props {
+  photo: Photo;
+  alt: string;
+  ratio?: number;
+  sizes?: string;
+  widths?: number[];
+  eager?: boolean;
+  credit?: boolean;
+  class?: string;
+}
+
+const { photo, alt, ratio = 3 / 4, sizes = "100vw", widths = [480, 800, 1200, 1600], eager = false, credit = false, class: className } = Astro.props;
+const fallback = widths[Math.min(1, widths.length - 1)];
+---
+
+<figure class:list={["picture", className]}>
+  <div class="photo" style={`aspect-ratio: ${ratio}`}>
+    <img
+      src={img(photo.url, fallback, Math.round(fallback / ratio))}
+      srcset={srcset(photo.url, widths, ratio)}
+      sizes={sizes}
+      alt={alt}
+      loading={eager ? "eager" : "lazy"}
+      fetchpriority={eager ? "high" : undefined}
+      decoding="async"
+    />
+  </div>
+  {
+    credit && (
+      <figcaption class="credit">
+        Photo: <a href={`${photo.photographer_url}?utm_source=halden_template&utm_medium=referral`} rel="noopener">{photo.photographer}</a> on{" "}
+        <a href={`${photo.source_url}?utm_source=halden_template&utm_medium=referral`} rel="noopener">Unsplash</a>
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .picture {
+    margin: 0;
+  }
+
+  figcaption {
+    margin-top: 8px;
+  }
+</style>

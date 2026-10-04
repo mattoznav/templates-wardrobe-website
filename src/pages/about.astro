@@ -1,0 +1,158 @@
+---
+import Base from "../layouts/Base.astro";
+import Picture from "../components/Picture.astro";
+import { catalog } from "../lib/catalog";
+
+const { store, editorial: ed } = await catalog();
+const principles = [
+  { n: "01", title: "Fewer, better fabrics", text: "Wool, cashmere, linen, cotton and silk, bought from mills we visit. No blends chosen to cut a price." },
+  { n: "02", title: "Sampled, worn, washed", text: "Every piece is worn and washed by the team for a season before it reaches the shop." },
+  { n: "03", title: "Made to be repaired", text: "Spare buttons in every garment, leather that can be fed and resoled, and a repair counter in the store." },
+];
+const care = [
+  { title: "Wash less", text: "Air knitwear and coats overnight instead of washing them. Spot clean marks as they happen." },
+  { title: "Fold knits", text: "Hanging stretches the shoulders. Fold sweaters and keep them in a drawer with cedar." },
+  { title: "Cool and slow", text: "Wash at 30°C or by hand, and dry flat away from the radiator." },
+  { title: "Feed leather", text: "A thin layer of balm twice a year keeps bags and shoes supple and stops them cracking." },
+];
+---
+
+<Base title="The atelier" description={`How ${store.name} makes clothes, and how to care for them.`} image={ed.atelier.image.url}>
+  <section class="wrap intro">
+    <span class="eyebrow">The atelier</span>
+    <h1>We make clothes <em>slowly,</em> so you can keep them for a long time.</h1>
+  </section>
+
+  <section class="wrap story">
+    <Picture photo={ed.atelier.image} alt={ed.atelier.alt} ratio={4 / 5} sizes="(max-width: 900px) 92vw, 45vw" eager credit />
+    <div class="story__copy">
+      <p class="lede">{ed.atelier.text}</p>
+      <p class="lede">
+        That means fewer pieces each season, made in the quantities we expect to sell. What is left at the end of the season stays on sale until it is gone: we
+        do not destroy stock.
+      </p>
+      <div class="principles">
+        {
+          principles.map((p) => (
+            <article>
+              <span class="eyebrow">{p.n}</span>
+              <h3>{p.title}</h3>
+              <p class="muted">{p.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section care" id="care">
+    <div class="wrap care__grid">
+      <div class="care__copy">
+        <span class="eyebrow">Care guide</span>
+        <h2>{ed.care.title}</h2>
+        <p class="lede">{ed.care.text}</p>
+        <ul>
+          {
+            care.map((c) => (
+              <li>
+                <h3>{c.title}</h3>
+                <p class="muted">{c.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <Picture photo={ed.care.image} alt={ed.care.alt} ratio={3 / 4} sizes="(max-width: 900px) 92vw, 40vw" credit />
+    </div>
+  </section>
+
+  <section class="wrap portrait">
+    <Picture photo={ed.portrait.image} alt={ed.portrait.alt} ratio={16 / 9} sizes="100vw" credit />
+  </section>
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: 22px;
+    padding-block: clamp(48px, 8vw, 120px) clamp(40px, 6vw, 80px);
+  }
+
+  .intro h1 {
+    max-width: 16ch;
+    font-size: clamp(44px, 6.4vw, 96px);
+  }
+
+  .story {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(32px, 7vw, 120px);
+    align-items: start;
+  }
+
+  .story__copy {
+    display: grid;
+    gap: 24px;
+    padding-top: clamp(0px, 4vw, 56px);
+  }
+
+  .principles {
+    display: grid;
+    gap: 28px;
+    margin-top: 24px;
+  }
+
+  .principles article {
+    display: grid;
+    gap: 8px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .principles h3 {
+    font-size: 28px;
+  }
+
+  .care {
+    margin-top: clamp(40px, 6vw, 80px);
+    background: var(--paper-sunken);
+  }
+
+  .care__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: clamp(32px, 7vw, 120px);
+    align-items: center;
+  }
+
+  .care__copy {
+    display: grid;
+    gap: 22px;
+  }
+
+  .care ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .care li h3 {
+    margin-bottom: 6px;
+    font-size: 24px;
+  }
+
+  .portrait {
+    padding-top: clamp(64px, 8vw, 120px);
+  }
+
+  @media (max-width: 900px) {
+    .story,
+    .care__grid,
+    .care ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

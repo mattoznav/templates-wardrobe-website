@@ -1,0 +1,448 @@
+---
+import Base from "../layouts/Base.astro";
+import AuthForm from "../components/AuthForm.astro";
+import Icon from "../components/Icon.astro";
+import { catalog } from "../lib/catalog";
+import { deliveryWindow, money } from "../lib/format";
+
+const { store, shipping } = await catalog();
+---
+
+<Base title="Checkout">
+  <section class="wrap checkout" data-checkout-page data-country={store.country}>
+    <header class="checkout__head">
+      <a class="back" href="/bag/"><Icon name="arrow-left" size={16} /> Back to bag</a>
+      <h1>Checkout</h1>
+    </header>
+
+    <div class="checkout__grid" data-step="form">
+      <div class="steps">
+        <section class="step" data-account-step>
+          <h2><span>1</span> Account</h2>
+          <div data-signed-out>
+            <AuthForm intro="Sign in or create an account to place your order and follow it afterwards." />
+          </div>
+          <p class="signed-in" data-signed-in hidden>
+            Signed in as <strong data-user-email></strong>
+            <button type="button" class="text-link" data-sign-out>Not you?</button>
+          </p>
+        </section>
+
+        <form class="step" data-address-form novalidate>
+          <h2><span>2</span> Delivery</h2>
+          <fieldset class="address" data-address>
+            <div class="field field--wide">
+              <label for="full_name">Full name</label>
+              <input id="full_name" name="full_name" autocomplete="name" required />
+            </div>
+            <div class="field field--wide">
+              <label for="address_line1">Address</label>
+              <input id="address_line1" name="address_line1" autocomplete="address-line1" required />
+            </div>
+            <div class="field field--wide">
+              <label for="address_line2">Apartment, floor (optional)</label>
+              <input id="address_line2" name="address_line2" autocomplete="address-line2" />
+            </div>
+            <div class="field">
+              <label for="postal_code">Postal code</label>
+              <input id="postal_code" name="postal_code" autocomplete="postal-code" required />
+            </div>
+            <div class="field">
+              <label for="city">City</label>
+              <input id="city" name="city" autocomplete="address-level2" required />
+            </div>
+            <div class="field">
+              <label for="country">Country code</label>
+              <input id="country" name="country" autocomplete="country" maxlength="2" required value={store.country} />
+            </div>
+            <div class="field">
+              <label for="phone">Phone (for the courier)</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" />
+            </div>
+          </fieldset>
+
+          <h3 class="eyebrow methods__title">Delivery method</h3>
+          <div class="methods" role="radiogroup" aria-label="Delivery method">
+            {
+              shipping.map((m, i) => (
+                <label class="method">
+                  <input type="radio" name="shipping_method" value={m.code} checked={i === 0} />
+                  <span class="method__body">
+                    <span class="method__name">{m.name}</span>
+                    <span class="method__desc">{m.description}</span>
+                    <span class="method__when">{deliveryWindow(m.days_min, m.days_max)}</span>
+                  </span>
+                  <span class="method__price price" data-method-price={m.code}>
+                    {Number(m.price) ? money(m.price, store.currency) : "Free"}
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+
+          <p class="form-error" data-form-error role="alert" hidden></p>
+          <button class="btn btn--solid btn--block" type="submit" data-place>Continue to payment</button>
+          <p class="muted small">Your pieces are set aside for 15 minutes while you pay.</p>
+        </form>
+
+        <section class="step" data-pay-step hidden>
+          <h2><span>3</span> Payment</h2>
+          <p class="hold" data-hold><Icon name="clock" size={18} /> Your pieces are set aside for <strong data-countdown>15:00</strong></p>
+
+          <div class="fake" data-fake hidden>
+            <p class="notice">
+              Demo payment. No card is charged and no money moves: the shop runs on the backend's fake payment provider.
+            </p>
+            <button type="button" class="btn btn--solid btn--block" data-fake-pay>Pay</button>
+            <button type="button" class="text-link" data-fake-decline>Simulate a declined card</button>
+          </div>
+
+          <form class="stripe" data-stripe hidden>
+            <div data-stripe-element></div>
+            <button class="btn btn--solid btn--block" type="submit" data-stripe-pay>Pay</button>
+          </form>
+
+          <p class="form-error" data-pay-error role="alert" hidden></p>
+          <button type="button" class="text-link" data-edit-order>Change delivery details</button>
+        </section>
+      </div>
+
+      <aside class="summary">
+        <h2 class="summary__title">Your order</h2>
+        <ul class="summary__lines" data-summary-lines></ul>
+        <dl>
+          <div><dt>Subtotal</dt><dd class="price" data-subtotal></dd></div>
+          <div><dt>Delivery</dt><dd class="price" data-shipping></dd></div>
+          <div class="summary__total"><dt>Total</dt><dd class="price" data-total></dd></div>
+        </dl>
+        <ul class="problems" data-problems hidden></ul>
+      </aside>
+    </div>
+
+    <div class="state" data-step="confirming" hidden>
+      <p class="eyebrow">One moment</p>
+      <h2>Confirming your payment</h2>
+      <p class="lede">This takes a few seconds.</p>
+    </div>
+
+    <div class="state" data-step="done" hidden>
+      <span class="state__icon"><Icon name="check" size={28} /></span>
+      <p class="eyebrow">Order <span data-reference></span></p>
+      <h2>Thank you, <em data-first-name>it's on its way</em></h2>
+      <p class="lede">
+        We have your order and will send it within one working day. You can follow it, cancel it before it ships and request a return from your account.
+      </p>
+      <div class="state__cta">
+        <a class="btn btn--solid" data-order-link href="/account/">View your order</a>
+        <a class="btn" href="/shop/">Keep shopping</a>
+      </div>
+    </div>
+
+    <div class="state" data-step="error" hidden>
+      <p class="eyebrow">Checkout</p>
+      <h2 data-error-title>Something went wrong</h2>
+      <p class="lede" data-error-text></p>
+      <div class="state__cta">
+        <a class="btn btn--solid" href="/bag/">Back to bag</a>
+      </div>
+    </div>
+
+    <div class="state" data-step="empty" hidden>
+      <h2>Your bag is empty</h2>
+      <div class="state__cta"><a class="btn" href="/shop/">Discover the collection</a></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .checkout {
+    padding-top: clamp(24px, 4vw, 48px);
+  }
+
+  .checkout__head {
+    display: grid;
+    gap: 14px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+
+  .checkout__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+
+  .steps {
+    display: grid;
+  }
+
+  .step {
+    display: grid;
+    gap: 20px;
+    padding-block: 32px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-size: 32px;
+  }
+
+  .step h2 span {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .signed-in {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 14.5px;
+  }
+
+  .signed-in strong {
+    font-weight: 500;
+  }
+
+  .address {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .field--wide {
+    grid-column: 1 / -1;
+  }
+
+  .methods__title {
+    margin-top: 8px;
+  }
+
+  .methods {
+    display: grid;
+    gap: 8px;
+  }
+
+  .method {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: start;
+    padding: 16px;
+    border: 1px solid var(--line-strong);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .method:has(input:checked) {
+    border-color: var(--ink);
+    background: var(--paper-raised);
+  }
+
+  .method input {
+    margin-top: 3px;
+    accent-color: var(--ink);
+  }
+
+  .method__body {
+    display: grid;
+    gap: 2px;
+  }
+
+  .method__name {
+    font-weight: 500;
+  }
+
+  .method__desc,
+  .method__when {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .small {
+    font-size: 12.5px;
+  }
+
+  .hold {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    background: var(--paper-sunken);
+    font-size: 14px;
+  }
+
+  .hold[data-urgent] {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .hold strong {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .fake,
+  .stripe {
+    display: grid;
+    gap: 14px;
+    justify-items: center;
+  }
+
+  .fake .notice,
+  .stripe > * {
+    justify-self: stretch;
+  }
+
+  .summary {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    display: grid;
+    gap: 18px;
+    margin-top: 32px;
+    padding: 28px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+  }
+
+  .summary__title {
+    font-size: 28px;
+  }
+
+  .summary__lines {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding: 0 0 18px;
+    border-bottom: 1px solid var(--line);
+    list-style: none;
+  }
+
+  .summary__lines :global(li) {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    font-size: 13.5px;
+  }
+
+  .summary__lines :global(.photo) {
+    aspect-ratio: 3 / 4;
+  }
+
+  .summary__lines :global(.qty) {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 10px;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .summary__lines :global(.thumb) {
+    position: relative;
+  }
+
+  .summary__lines :global(.meta) {
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+
+  dl {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+  }
+
+  dl div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .summary__total {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 17px !important;
+    font-weight: 500;
+    color: var(--ink) !important;
+  }
+
+  .problems {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 12px 14px;
+    list-style: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  .state {
+    display: grid;
+    justify-items: start;
+    gap: 20px;
+    max-width: 680px;
+    padding-block: clamp(48px, 8vw, 112px);
+  }
+
+  .state__icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+  }
+
+  .state__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 960px) {
+    .checkout__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .summary {
+      position: static;
+      order: -1;
+    }
+  }
+</style>
+
+<script>
+  import { initCheckout } from "../scripts/checkout";
+  initCheckout();
+</script>

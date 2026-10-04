@@ -1,0 +1,178 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import Picture from "../components/Picture.astro";
+import { catalog } from "../lib/catalog";
+import { country, deliveryWindow, money } from "../lib/format";
+
+const { store, editorial: ed, shipping } = await catalog();
+const services = [
+  { icon: "scissors", title: "Alterations while you wait", text: "Trousers and sleeves hemmed in about thirty minutes, free on full-price pieces." },
+  { icon: "storefront", title: "Collect in store", text: "Order online and collect two hours later. Try it on here and leave what does not fit." },
+  { icon: "arrow-u-up-left", title: "Returns at the counter", text: `Bring back online orders within ${store.return_window_days} days for an immediate refund.` },
+  { icon: "leaf", title: "Repairs", text: "Loose buttons, small tears and worn elbows: we repair what we sell, for as long as you own it." },
+];
+---
+
+<Base title="The store" description={`${store.name} in ${store.city}: opening hours, address and services.`} image={ed.store.image.url}>
+  <section class="wrap visit">
+    <div class="visit__copy">
+      <span class="eyebrow">{store.city}</span>
+      <h1>The <em>store</em></h1>
+      <p class="lede">{ed.store.text}</p>
+      <dl>
+        <div>
+          <dt><Icon name="map-pin" size={20} /></dt>
+          <dd>{store.address}<br />{store.postal_code} {store.city}, {country(store.country)}</dd>
+        </div>
+        <div>
+          <dt><Icon name="clock" size={20} /></dt>
+          <dd>{store.opening_hours}</dd>
+        </div>
+        <div>
+          <dt><Icon name="phone" size={20} /></dt>
+          <dd>{store.phone}</dd>
+        </div>
+        <div>
+          <dt><Icon name="envelope" size={20} /></dt>
+          <dd><a href={`mailto:${store.email}`}>{store.email}</a></dd>
+        </div>
+      </dl>
+    </div>
+    <Picture photo={ed.store.image} alt={ed.store.alt} ratio={4 / 5} sizes="(max-width: 900px) 92vw, 50vw" eager credit />
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <h2>Services</h2>
+      <div class="services">
+        {
+          services.map((s) => (
+            <article>
+              <Icon name={s.icon} size={28} />
+              <h3>{s.title}</h3>
+              <p class="muted">{s.text}</p>
+            </article>
+          ))
+        }
+      </div>
+
+      <h2 class="delivery__title">Delivery</h2>
+      <table class="delivery">
+        <thead>
+          <tr><th>Method</th><th>When</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+          {
+            shipping.map((m) => (
+              <tr>
+                <td>
+                  <strong>{m.name}</strong>
+                  <br />
+                  <span class="muted">{m.description}</span>
+                </td>
+                <td>{deliveryWindow(m.days_min, m.days_max)}</td>
+                <td>
+                  {Number(m.price) ? money(m.price, store.currency) : "Free"}
+                  {m.free_over_threshold && store.free_shipping_over && (
+                    <span class="muted"> (free over {money(store.free_shipping_over, store.currency)})</span>
+                  )}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .visit {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(32px, 7vw, 120px);
+    align-items: center;
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+
+  .visit__copy {
+    display: grid;
+    gap: 24px;
+  }
+
+  dl {
+    display: grid;
+    gap: 16px;
+    margin: 8px 0 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  dl div {
+    display: flex;
+    gap: 16px;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .services {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+    margin-top: 40px;
+  }
+
+  .services article {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--ink);
+  }
+
+  .services h3 {
+    font-size: 26px;
+  }
+
+  .delivery__title {
+    margin-top: clamp(64px, 8vw, 112px);
+  }
+
+  .delivery {
+    width: 100%;
+    margin-top: 32px;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  .delivery th {
+    padding: 12px 16px 12px 0;
+    border-bottom: 1px solid var(--ink);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .delivery td {
+    padding: 18px 16px 18px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  .delivery strong {
+    font-weight: 500;
+  }
+
+  @media (max-width: 900px) {
+    .visit,
+    .services {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

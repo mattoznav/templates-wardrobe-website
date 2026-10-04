@@ -1,0 +1,187 @@
+---
+/** Product tile: photo (second photo on hover), name, price, colours. */
+import { money } from "../lib/format";
+import { sectionOf } from "../lib/catalog";
+import { img, srcset } from "../lib/image";
+import type { Product } from "../lib/types";
+
+interface Props {
+  product: Product;
+  currency: string;
+  sizes?: string;
+  eager?: boolean;
+}
+
+const { product: p, currency, sizes = "(max-width: 760px) 50vw, 25vw", eager = false } = Astro.props;
+const [first, second] = p.images;
+const ratio = 3 / 4;
+const widths = [360, 540, 720, 960];
+const sold = !p.in_stock;
+---
+
+<article
+  class="card"
+  data-product-card
+  data-slug={p.slug}
+  data-section={sectionOf(p)}
+  data-department={p.department}
+  data-category={p.category}
+  data-colours={p.colours.map((c) => c.slug).join(" ")}
+  data-sizes={p.variants.filter((v) => v.stock > 0).map((v) => v.size).join(" ")}
+  data-price={p.price}
+  data-popularity={p.popularity}
+  data-created={p.created_at}
+  data-new={p.is_new ? "1" : "0"}
+  data-sale={p.on_sale ? "1" : "0"}
+  data-collections={p.collections.join(" ")}
+  data-name={p.name.toLowerCase()}
+>
+  <a href={`/products/${p.slug}/`} class="card__link">
+    <div class="card__photo photo">
+      {
+        first && (
+          <img
+            class="card__img"
+            src={img(first.url, 540, 720)}
+            srcset={srcset(first.url, widths, ratio)}
+            sizes={sizes}
+            alt={first.alt}
+            loading={eager ? "eager" : "lazy"}
+            decoding="async"
+          />
+        )
+      }
+      {
+        second && (
+          <img
+            class="card__img card__img--alt"
+            src={img(second.url, 540, 720)}
+            srcset={srcset(second.url, widths, ratio)}
+            sizes={sizes}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        )
+      }
+      <div class="card__tags">
+        {p.is_new && <span>New</span>}
+        {p.on_sale && <span class="card__tag--sale">Sale</span>}
+        {sold && <span>Sold out</span>}
+      </div>
+    </div>
+    <div class="card__info">
+      <h3 class="card__name">{p.name}</h3>
+      <p class:list={["price", { "price--sale": p.on_sale }]}>
+        {
+          p.on_sale ? (
+            <>
+              <ins>{money(p.price, currency)}</ins>
+              <del>{money(p.compare_at_price!, currency)}</del>
+            </>
+          ) : (
+            money(p.price, currency)
+          )
+        }
+      </p>
+      {
+        p.colours.length > 1 && (
+          <ul class="card__swatches" aria-label={`${p.colours.length} colours`}>
+            {p.colours.map((c) => (
+              <li style={`--swatch: ${c.hex}`} title={c.name} />
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </a>
+</article>
+
+<style>
+  .card__link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .card__photo {
+    aspect-ratio: 3 / 4;
+  }
+
+  .card__img {
+    position: absolute;
+    inset: 0;
+    transition:
+      opacity 0.6s var(--ease),
+      transform 1.4s var(--ease);
+  }
+
+  .card__img--alt {
+    opacity: 0;
+  }
+
+  @media (hover: hover) {
+    .card__link:hover .card__img {
+      transform: scale(1.03);
+    }
+
+    .card__link:hover .card__img--alt {
+      opacity: 1;
+    }
+  }
+
+  .card__tags {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .card__tags span {
+    padding: 4px 8px;
+    background: var(--paper);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .card__tags .card__tag--sale {
+    color: var(--accent);
+  }
+
+  .card__info {
+    display: grid;
+    gap: 2px;
+    padding-top: 14px;
+  }
+
+  .card__name {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 450;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .card__info .price {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .card__swatches {
+    display: flex;
+    gap: 5px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card__swatches li {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+  }
+</style>

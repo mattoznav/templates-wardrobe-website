@@ -1,0 +1,425 @@
+---
+import Base from "../layouts/Base.astro";
+import AuthForm from "../components/AuthForm.astro";
+import Icon from "../components/Icon.astro";
+import { catalog } from "../lib/catalog";
+
+const { store } = await catalog();
+---
+
+<Base title="Your account">
+  <section class="wrap account" data-account data-return-days={store.return_window_days}>
+    <div class="signin" data-signed-out hidden>
+      <div class="signin__copy">
+        <span class="eyebrow">Your account</span>
+        <h1>Welcome <em>back</em></h1>
+        <p class="lede">Follow your orders, cancel before they ship and send pieces back within {store.return_window_days} days.</p>
+      </div>
+      <div class="signin__form">
+        <AuthForm />
+      </div>
+    </div>
+
+    <div data-signed-in hidden>
+      <header class="account__head">
+        <div>
+          <span class="eyebrow">Your account</span>
+          <h1>Hello, <em data-name></em></h1>
+        </div>
+        <button type="button" class="link" data-sign-out>Sign out</button>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="Account">
+        <button type="button" role="tab" aria-selected="true" data-tab="orders">Orders</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="returns">Returns</button>
+      </nav>
+
+      <div data-panel="orders">
+        <div class="orders" data-orders></div>
+        <p class="empty" data-orders-empty hidden>
+          No orders yet. <a href="/shop/">Discover the collection</a>
+        </p>
+      </div>
+
+      <div data-panel="returns" hidden>
+        <div class="returns" data-returns></div>
+        <p class="empty" data-returns-empty hidden>No returns. Pieces from delivered orders can be returned from the order page.</p>
+      </div>
+    </div>
+
+    <div class="order" data-order hidden>
+      <button type="button" class="back" data-back><Icon name="arrow-left" size={16} /> All orders</button>
+      <div data-order-body></div>
+
+      <form class="return-form" data-return-form hidden>
+        <h3>Return pieces</h3>
+        <p class="muted">Choose what you are sending back. We refund the pieces once they reach us; delivery costs are not refunded.</p>
+        <div class="return-lines" data-return-lines></div>
+        <div class="field">
+          <label for="reason">Reason</label>
+          <select id="reason" name="reason" required>
+            <option value="too_small">Too small</option>
+            <option value="too_large">Too large</option>
+            <option value="not_as_pictured">Not as pictured</option>
+            <option value="changed_mind">Changed my mind</option>
+            <option value="faulty">Faulty or damaged</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="note">Anything we should know (optional)</label>
+          <textarea id="note" name="note" maxlength="1000"></textarea>
+        </div>
+        <p class="form-error" data-return-error hidden></p>
+        <div class="return-form__actions">
+          <button type="submit" class="btn btn--solid">Request return</button>
+          <button type="button" class="text-link" data-return-cancel>Not now</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .account {
+    padding-top: clamp(32px, 5vw, 64px);
+    min-height: 60vh;
+  }
+
+  .signin {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+    gap: clamp(32px, 8vw, 140px);
+    align-items: start;
+    padding-block: clamp(16px, 4vw, 48px);
+  }
+
+  .signin__copy {
+    display: grid;
+    gap: 20px;
+  }
+
+  .account__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+    padding-bottom: 28px;
+  }
+
+  .account__head h1 {
+    margin-top: 10px;
+    font-size: clamp(40px, 5vw, 64px);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tabs button {
+    padding: 12px 0;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .tabs button[aria-selected="true"] {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .empty {
+    padding-block: 40px;
+    font-family: var(--display);
+    font-size: 26px;
+  }
+
+  .orders :global(.order-row),
+  .returns :global(.order-row) {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 24px;
+    align-items: center;
+    width: 100%;
+    padding: 22px 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .orders :global(.order-row:hover) {
+    background: linear-gradient(90deg, transparent, var(--paper-sunken), transparent);
+  }
+
+  :global(.order-row__main) {
+    display: grid;
+    gap: 4px;
+  }
+
+  :global(.order-row__ref) {
+    font-family: var(--display);
+    font-size: 24px;
+  }
+
+  :global(.order-row__thumbs) {
+    display: flex;
+    gap: 6px;
+  }
+
+  :global(.order-row__thumbs .photo) {
+    width: 44px;
+    aspect-ratio: 3 / 4;
+  }
+
+  :global(.status) {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1px solid var(--line-strong);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  :global(.status--good) {
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  :global(.status--warn) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .order {
+    display: grid;
+    gap: 28px;
+    padding-bottom: 32px;
+  }
+
+  .back {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  :global(.order__head) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  :global(.order__head h1) {
+    margin-top: 8px;
+    font-size: clamp(36px, 4vw, 52px);
+  }
+
+  :global(.timeline) {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  :global(.timeline li) {
+    position: relative;
+    padding-top: 22px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  :global(.timeline li::before) {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  :global(.timeline li::after) {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--paper);
+  }
+
+  :global(.timeline li.is-done) {
+    color: var(--ink);
+  }
+
+  :global(.timeline li.is-done::before),
+  :global(.timeline li.is-done::after) {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  :global(.timeline strong) {
+    display: block;
+    font-weight: 500;
+  }
+
+  :global(.order__grid) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+
+  :global(.order__lines) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  :global(.order__lines li) {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 18px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  :global(.order__lines .photo) {
+    aspect-ratio: 3 / 4;
+  }
+
+  :global(.order__lines a) {
+    font-family: var(--display);
+    font-size: 21px;
+    text-decoration: none;
+  }
+
+  :global(.order__side) {
+    display: grid;
+    gap: 22px;
+    padding: 24px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  :global(.order__side dl) {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+
+  :global(.order__side dl div) {
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink-soft);
+  }
+
+  :global(.order__side dd) {
+    margin: 0;
+  }
+
+  :global(.order__side .total) {
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  :global(.order__actions) {
+    display: grid;
+    gap: 10px;
+  }
+
+  .return-form {
+    display: grid;
+    gap: 18px;
+    max-width: 640px;
+    padding: 28px;
+    border: 1px solid var(--ink);
+    background: var(--paper-raised);
+  }
+
+  .return-form h3 {
+    font-size: 30px;
+  }
+
+  :global(.return-line) {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  :global(.return-line select) {
+    min-height: 36px;
+    padding: 0 8px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+  }
+
+  :global(.return-line input) {
+    accent-color: var(--ink);
+    width: 16px;
+    height: 16px;
+  }
+
+  .return-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .signin,
+    :global(.order__grid) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .orders :global(.order-row) {
+      grid-template-columns: 1fr auto;
+    }
+
+    :global(.order-row__thumbs) {
+      display: none !important;
+    }
+
+    :global(.timeline) {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: 18px;
+    }
+  }
+</style>
+
+<script>
+  import { initAccount } from "../scripts/account";
+  initAccount();
+</script>

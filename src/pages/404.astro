@@ -1,0 +1,34 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Page not found">
+  <section class="wrap missing">
+    <span class="eyebrow">Error 404</span>
+    <h1>This page has <em>moved on.</em></h1>
+    <p class="lede">The piece or page you are looking for is no longer here. It may have sold out, or the link may be out of date.</p>
+    <div class="missing__cta">
+      <a class="btn btn--solid" href="/shop/">Shop the collection</a>
+      <a class="btn" href="/">Home</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .missing {
+    display: grid;
+    justify-items: start;
+    gap: 24px;
+    padding-block: clamp(80px, 12vw, 180px);
+  }
+
+  .missing h1 {
+    max-width: 14ch;
+  }
+
+  .missing__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>

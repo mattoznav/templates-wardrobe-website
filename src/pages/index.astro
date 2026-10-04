@@ -1,0 +1,549 @@
+---
+import Base from "../layouts/Base.astro";
+import Picture from "../components/Picture.astro";
+import ProductCard from "../components/ProductCard.astro";
+import Icon from "../components/Icon.astro";
+import { catalog } from "../lib/catalog";
+import { country } from "../lib/format";
+import { img, srcset } from "../lib/image";
+
+const { store, editorial: ed, products, collections } = await catalog();
+const currency = store.currency;
+
+const newIn = products.filter((p) => p.is_new).slice(0, 8);
+const featured = collections[0];
+const featuredProducts = products.filter((p) => p.collections.includes(featured.slug)).slice(0, 4);
+const departments = [
+  { key: "women", href: "/shop/?section=women" },
+  { key: "men", href: "/shop/?section=men" },
+  { key: "accessories", href: "/shop/?section=accessories" },
+].map((d) => ({ ...d, ...ed[d.key] }));
+const hero = ed["home-hero"];
+const heroAlt = ed["home-hero-alt"];
+---
+
+<Base image={hero.image.url}>
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <div class="hero__copy">
+        <span class="eyebrow">Autumn and winter</span>
+        <h1>Made slowly.<br /><em>Worn for years.</em></h1>
+        <p class="lede">{hero.text}</p>
+        <div class="hero__cta">
+          <a class="btn btn--solid" href="/shop/?section=women">Shop women</a>
+          <a class="btn" href="/shop/?section=men">Shop men</a>
+        </div>
+      </div>
+      <div class="hero__images">
+        <div class="hero__main photo">
+          <img
+            src={img(hero.image.url, 900, 1200, 78)}
+            srcset={srcset(hero.image.url, [600, 900, 1200, 1600], 3 / 4, 78)}
+            sizes="(max-width: 900px) 92vw, 46vw"
+            alt={hero.alt}
+            fetchpriority="high"
+          />
+        </div>
+        <div class="hero__alt photo">
+          <img src={img(heroAlt.image.url, 520, 650)} srcset={srcset(heroAlt.image.url, [320, 520, 780], 4 / 5)} sizes="20vw" alt={heroAlt.alt} />
+        </div>
+        <p class="credit hero__credit">
+          Photos: <a href={hero.image.photographer_url}>{hero.image.photographer}</a>
+          {heroAlt.image.photographer !== hero.image.photographer && <>, <a href={heroAlt.image.photographer_url}>{heroAlt.image.photographer}</a></>} on Unsplash
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section new" data-reveal>
+    <div class="wrap">
+      <header class="head">
+        <div>
+          <span class="eyebrow">Just arrived</span>
+          <h2>New in</h2>
+        </div>
+        <a class="link" href="/shop/?new=1">View all <Icon name="arrow-right" size={14} /></a>
+      </header>
+      <div class="rail">
+        {newIn.map((p) => <ProductCard product={p} currency={currency} sizes="(max-width: 760px) 70vw, 24vw" />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="departments" data-reveal>
+    <div class="wrap departments__grid">
+      {
+        departments.map((d) => (
+          <a class="dept" href={d.href}>
+            <div class="dept__photo photo">
+              <img src={img(d.image.url, 700, 980)} srcset={srcset(d.image.url, [420, 700, 1000], 5 / 7)} sizes="(max-width: 760px) 92vw, 31vw" alt={d.alt} loading="lazy" />
+            </div>
+            <div class="dept__label">
+              <h3>{d.title}</h3>
+              <p>{d.text}</p>
+              <span class="link">Shop now</span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section feature" data-reveal>
+    <div class="wrap feature__grid">
+      <div class="feature__image">
+        <Picture photo={featured.image} alt={featured.alt} ratio={4 / 5} sizes="(max-width: 900px) 92vw, 52vw" credit />
+      </div>
+      <div class="feature__copy">
+        <span class="eyebrow">The edit</span>
+        <h2>{featured.title}</h2>
+        <p class="lede">{featured.description}</p>
+        <div class="feature__products">
+          {featuredProducts.map((p) => <ProductCard product={p} currency={currency} sizes="(max-width: 900px) 46vw, 18vw" />)}
+        </div>
+        <a class="btn" href={`/collections/${featured.slug}/`}>Explore the edit</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" data-reveal>
+    <div class="band__photo photo">
+      <img src={img(ed.knitwear.image.url, 1800, 900)} srcset={srcset(ed.knitwear.image.url, [900, 1400, 2000], 2)} sizes="100vw" alt={ed.knitwear.alt} loading="lazy" />
+    </div>
+    <div class="band__copy">
+      <span class="eyebrow">Our knitwear</span>
+      <h2>{ed.knitwear.title}</h2>
+      <p>{ed.knitwear.text}</p>
+      <a class="btn btn--light" href="/shop/?category=knitwear">Shop knitwear</a>
+      <p class="credit">Photo: <a href={ed.knitwear.image.source_url}>{ed.knitwear.image.photographer}</a> on Unsplash</p>
+    </div>
+  </section>
+
+  <section class="section edits" data-reveal>
+    <div class="wrap">
+      <header class="head">
+        <div>
+          <span class="eyebrow">Collections</span>
+          <h2>Edits for the season</h2>
+        </div>
+        <a class="link" href="/collections/">All collections <Icon name="arrow-right" size={14} /></a>
+      </header>
+      <div class="edits__grid">
+        {
+          collections.map((c, i) => (
+            <a class="edit" href={`/collections/${c.slug}/`}>
+              <div class="edit__photo photo">
+                <img src={img(c.image.url, 600, 800)} srcset={srcset(c.image.url, [360, 600, 900], 3 / 4)} sizes="(max-width: 760px) 46vw, 23vw" alt={c.alt} loading="lazy" />
+              </div>
+              <span class="edit__num">0{i + 1}</span>
+              <h3>{c.title}</h3>
+              <p class="muted">{c.subtitle}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section atelier" data-reveal>
+    <div class="wrap atelier__grid">
+      <div class="atelier__copy">
+        <span class="eyebrow">The atelier</span>
+        <h2>{ed.atelier.title}</h2>
+        <p class="lede">{ed.atelier.text}</p>
+        <a class="link" href="/about/">How we work <Icon name="arrow-right" size={14} /></a>
+      </div>
+      <Picture photo={ed.atelier.image} alt={ed.atelier.alt} ratio={4 / 5} sizes="(max-width: 900px) 92vw, 40vw" credit />
+    </div>
+  </section>
+
+  <section class="store" data-reveal>
+    <div class="wrap store__grid">
+      <Picture photo={ed.store.image} alt={ed.store.alt} ratio={16 / 11} sizes="(max-width: 900px) 92vw, 55vw" credit />
+      <div class="store__copy">
+        <span class="eyebrow">{store.city}</span>
+        <h2>{ed.store.title}</h2>
+        <p class="lede">{ed.store.text}</p>
+        <dl>
+          <div>
+            <dt><Icon name="map-pin" size={18} /></dt>
+            <dd>{store.address}, {store.postal_code} {store.city}, {country(store.country)}</dd>
+          </div>
+          <div>
+            <dt><Icon name="clock" size={18} /></dt>
+            <dd>{store.opening_hours}</dd>
+          </div>
+        </dl>
+        <a class="btn" href="/store/">Plan a visit</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Hero */
+
+  .hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 11fr) minmax(0, 13fr);
+    gap: clamp(32px, 4vw, 64px);
+    align-items: center;
+    min-height: calc(100svh - var(--header-h) - 36px);
+    padding-block: clamp(32px, 5vw, 64px);
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: 26px;
+    align-content: center;
+  }
+
+  .hero__copy h1 {
+    font-size: clamp(52px, 6.4vw, 104px);
+    line-height: 0.95;
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .hero__images {
+    position: relative;
+    padding: 0 0 clamp(40px, 6vw, 80px) clamp(40px, 6vw, 96px);
+  }
+
+  .hero__main {
+    aspect-ratio: 3 / 4;
+    max-height: calc(100svh - var(--header-h) - 120px);
+    margin-left: auto;
+  }
+
+  .hero__main img {
+    animation: settle 1.8s var(--ease) both;
+  }
+
+  .hero__alt {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 34%;
+    aspect-ratio: 4 / 5;
+    outline: 10px solid var(--paper);
+  }
+
+  .hero__credit {
+    position: absolute;
+    right: 0;
+    bottom: 12px;
+  }
+
+  @keyframes settle {
+    from {
+      transform: scale(1.06);
+      opacity: 0.2;
+    }
+  }
+
+  /* Shared heads */
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+    margin-bottom: clamp(28px, 4vw, 48px);
+  }
+
+  .head h2 {
+    margin-top: 10px;
+  }
+
+  /* New in: a rail that scrolls sideways on small screens */
+
+  .rail {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(14px, 2vw, 28px) clamp(12px, 1.6vw, 24px);
+  }
+
+  /* Departments */
+
+  .departments__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(12px, 1.6vw, 24px);
+  }
+
+  .dept {
+    position: relative;
+    display: block;
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .dept__photo {
+    aspect-ratio: 5 / 7;
+  }
+
+  .dept__photo img {
+    transition: transform 1.4s var(--ease);
+  }
+
+  .dept:hover .dept__photo img {
+    transform: scale(1.04);
+  }
+
+  .dept__photo::after {
+    content: "";
+    position: absolute;
+    inset: 40% 0 0;
+    background: linear-gradient(to bottom, transparent, rgb(20 18 16 / 0.55));
+  }
+
+  .dept__label {
+    position: absolute;
+    left: clamp(18px, 2.4vw, 32px);
+    right: clamp(18px, 2.4vw, 32px);
+    bottom: clamp(18px, 2.4vw, 32px);
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+  }
+
+  .dept__label h3 {
+    font-size: clamp(32px, 3.4vw, 48px);
+    font-weight: 350;
+  }
+
+  .dept__label p {
+    font-size: 14px;
+    opacity: 0.88;
+  }
+
+  .dept__label .link {
+    margin-top: 6px;
+  }
+
+  /* Featured collection */
+
+  .feature__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+
+  .feature__image {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    display: block;
+  }
+
+  .feature__copy {
+    display: grid;
+    gap: 22px;
+    justify-items: start;
+    padding-top: clamp(0px, 4vw, 48px);
+  }
+
+  .feature__products {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 18px;
+    width: 100%;
+    margin-block: 14px 8px;
+  }
+
+  /* Knitwear band */
+
+  .band {
+    position: relative;
+    min-height: min(78vh, 760px);
+    display: grid;
+    align-items: end;
+    color: var(--paper);
+  }
+
+  .band__photo {
+    position: absolute;
+    inset: 0;
+  }
+
+  .band__photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(20 18 16 / 0.62) 0%, rgb(20 18 16 / 0.15) 60%, transparent);
+  }
+
+  .band__copy {
+    position: relative;
+    display: grid;
+    gap: 18px;
+    justify-items: start;
+    max-width: 560px;
+    padding: clamp(32px, 6vw, 88px) var(--gutter);
+    margin-left: max(0px, calc((100vw - var(--max)) / 2));
+  }
+
+  .band__copy .eyebrow,
+  .band__copy .credit {
+    color: rgb(246 242 235 / 0.75);
+  }
+
+  .band__copy p:not(.credit) {
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  /* Edits */
+
+  .edits__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(14px, 2vw, 28px);
+  }
+
+  .edit {
+    display: grid;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .edit__photo {
+    aspect-ratio: 3 / 4;
+    margin-bottom: 8px;
+  }
+
+  .edit__photo img {
+    transition: transform 1.4s var(--ease);
+  }
+
+  .edit:hover .edit__photo img {
+    transform: scale(1.04);
+  }
+
+  .edit__num {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+
+  .edit h3 {
+    font-size: 28px;
+  }
+
+  /* Atelier */
+
+  .atelier__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: center;
+  }
+
+  .atelier__copy {
+    display: grid;
+    gap: 24px;
+    justify-items: start;
+  }
+
+  /* Store */
+
+  .store__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+    padding-block: clamp(32px, 4vw, 56px);
+    border-top: 1px solid var(--line);
+  }
+
+  .store__copy {
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+  }
+
+  dl {
+    display: grid;
+    gap: 12px;
+    margin: 4px 0 8px;
+  }
+
+  dl div {
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    color: var(--ink-soft);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .hero__inner,
+    .feature__grid,
+    .atelier__grid,
+    .store__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero__inner {
+      min-height: 0;
+    }
+
+    .hero__images {
+      order: -1;
+      padding-left: 0;
+      padding-bottom: 0;
+    }
+
+    .hero__main {
+      max-height: none;
+    }
+
+    .hero__alt {
+      display: none;
+    }
+
+    .hero__credit {
+      position: static;
+      margin-top: 8px;
+    }
+
+    .feature__image {
+      position: static;
+    }
+
+    .rail {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .rail > :global(*) {
+      flex: 0 0 68%;
+      scroll-snap-align: start;
+    }
+
+    .departments__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dept__photo {
+      aspect-ratio: 4 / 5;
+    }
+
+    .edits__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

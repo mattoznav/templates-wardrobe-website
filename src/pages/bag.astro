@@ -1,0 +1,196 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import ProductCard from "../components/ProductCard.astro";
+import { catalog } from "../lib/catalog";
+
+const { store, products } = await catalog();
+const suggestions = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 4);
+---
+
+<Base title="Your bag">
+  <section class="wrap bag" data-bag-page>
+    <header class="bag__head">
+      <h1>Your bag</h1>
+      <p class="muted" data-bag-summary></p>
+    </header>
+
+    <div class="bag__grid" data-bag-full hidden>
+      <div>
+        <ul class="bag__lines" data-bag-lines></ul>
+      </div>
+
+      <aside class="summary">
+        <h2 class="summary__title">Summary</h2>
+        <dl>
+          <div><dt>Subtotal</dt><dd class="price" data-subtotal></dd></div>
+          <div><dt>Standard delivery</dt><dd class="price" data-shipping></dd></div>
+          <div class="summary__total"><dt>Total</dt><dd class="price" data-total></dd></div>
+        </dl>
+        <ul class="problems" data-problems hidden></ul>
+        <a class="btn btn--solid btn--block" href="/checkout/" data-checkout>Checkout</a>
+        <ul class="perks">
+          <li><Icon name="truck" size={18} /> Express and collect in store at checkout</li>
+          <li><Icon name="arrow-u-up-left" size={18} /> Free returns within {store.return_window_days} days</li>
+        </ul>
+      </aside>
+    </div>
+
+    <div class="empty" data-bag-empty hidden>
+      <p>Your bag is empty.</p>
+      <a class="btn" href="/shop/">Discover the collection</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2 class="more">You may also like</h2>
+      <div class="more__grid">
+        {suggestions.map((p) => <ProductCard product={p} currency={store.currency} />)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .bag {
+    padding-top: clamp(32px, 5vw, 64px);
+  }
+
+  .bag__head {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .bag__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+
+  .bag__lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bag__lines :global(.bag-line) {
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    gap: 24px;
+    padding: 24px 0;
+  }
+
+  .bag__lines :global(.bag-line__name) {
+    font-size: 26px;
+  }
+
+  .summary {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    display: grid;
+    gap: 18px;
+    margin-top: 24px;
+    padding: 28px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+  }
+
+  .summary__title {
+    font-size: 28px;
+  }
+
+  dl {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+  }
+
+  dl div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .summary__total {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 17px !important;
+    font-weight: 500;
+    color: var(--ink) !important;
+  }
+
+  .problems {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 12px 14px;
+    list-style: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  .perks {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .perks li {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .empty {
+    display: grid;
+    justify-items: start;
+    gap: 24px;
+    padding-block: 56px;
+    font-family: var(--display);
+    font-size: 32px;
+  }
+
+  .more {
+    margin-bottom: 40px;
+  }
+
+  .more__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(12px, 1.6vw, 24px);
+  }
+
+  @media (max-width: 900px) {
+    .bag__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bag__lines :global(.bag-line) {
+      grid-template-columns: 90px minmax(0, 1fr) auto;
+      gap: 16px;
+    }
+
+    .more__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { initBagPage } from "../scripts/bag-page";
+  initBagPage();
+</script>

@@ -1,0 +1,483 @@
+---
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { catalog, DEPARTMENTS, sectionOf } from "../../lib/catalog";
+import { money } from "../../lib/format";
+import { img, srcset } from "../../lib/image";
+import type { Product } from "../../lib/types";
+
+export async function getStaticPaths() {
+  const { products } = await catalog();
+  return products.map((product) => ({ params: { slug: product.slug }, props: { product } }));
+}
+
+interface Props {
+  product: Product;
+}
+
+const { product: p } = Astro.props;
+const { store, products, collections } = await catalog();
+const currency = store.currency;
+const section = sectionOf(p);
+const sectionName = DEPARTMENTS.find((d) => d.slug === section)?.name ?? "Shop";
+
+// Complete the look: same collection first, then the same section
+const related = [
+  ...products.filter((o) => o.slug !== p.slug && o.collections.some((c) => p.collections.includes(c))),
+  ...products.filter((o) => o.slug !== p.slug && sectionOf(o) === section),
+].filter((o, i, all) => all.findIndex((x) => x.slug === o.slug) === i).slice(0, 4);
+const inCollections = collections.filter((c) => p.collections.includes(c.slug));
+const photographers = [...new Map(p.images.map((i) => [i.photographer, i])).values()];
+const singleSize = p.sizes.length === 1 && p.sizes[0].code === "one-size";
+---
+
+<Base title={p.name} description={p.description} image={p.images[0]?.url}>
+  <article class="product" data-product={JSON.stringify({ slug: p.slug, name: p.name, price: p.price, variants: p.variants, images: p.images.map((i) => ({ url: i.url, colour: i.colour })) })}>
+    <div class="wrap product__grid">
+      <div class="gallery" data-gallery>
+        {
+          p.images.map((image, i) => (
+            <figure class="gallery__item" data-colour={image.colour ?? ""}>
+              <div class="photo">
+                <img
+                  src={img(image.url, 900, 1200, 80)}
+                  srcset={srcset(image.url, [600, 900, 1200, 1600], 3 / 4, 80)}
+                  sizes="(max-width: 900px) 92vw, 50vw"
+                  alt={image.alt}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchpriority={i === 0 ? "high" : undefined}
+                />
+              </div>
+            </figure>
+          ))
+        }
+      </div>
+
+      <div class="info">
+        <div class="info__sticky">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href={`/shop/?section=${section}`}>{sectionName}</a>
+            <span aria-hidden="true">/</span>
+            <a href={`/shop/?section=${section}&category=${p.category}`}>{p.category_name}</a>
+          </nav>
+
+          <h1>{p.name}</h1>
+          <p class:list={["price", "info__price", { "price--sale": p.on_sale }]}>
+            {
+              p.on_sale ? (
+                <>
+                  <ins>{money(p.price, currency)}</ins>
+                  <del>{money(p.compare_at_price!, currency)}</del>
+                </>
+              ) : (
+                money(p.price, currency)
+              )
+            }
+          </p>
+
+          <div class="option">
+            <p class="option__label">
+              <span class="eyebrow">Colour</span>
+              <span data-colour-name>{p.colours[0]?.name}</span>
+            </p>
+            <div class="colours" role="radiogroup" aria-label="Colour">
+              {
+                p.colours.map((c, i) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    class="colour"
+                    style={`--swatch: ${c.hex}`}
+                    data-colour={c.slug}
+                    data-name={c.name}
+                    aria-checked={i === 0 ? "true" : "false"}
+                    aria-label={c.name}
+                    title={c.name}
+                  />
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="option" hidden={singleSize}>
+            <p class="option__label">
+              <span class="eyebrow">Size</span>
+              <span class="muted" data-size-note></span>
+            </p>
+            <div class="sizes" role="radiogroup" aria-label="Size" data-sizes>
+              {
+                p.sizes.map((s) => (
+                  <button type="button" role="radio" class="size" data-size={s.code} aria-checked="false">
+                    {s.label}
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+
+          <p class="stock" data-stock aria-live="polite"></p>
+
+          <button type="button" class="btn btn--solid btn--block add" data-add disabled>
+            {singleSize ? "Add to bag" : "Select a size"}
+          </button>
+          <p class="form-error" data-add-error hidden></p>
+
+          <ul class="perks">
+            <li>
+              <Icon name="truck" size={18} />
+              {store.free_shipping_over ? `Free standard delivery over ${money(store.free_shipping_over, currency)}` : "Tracked delivery"}
+            </li>
+            <li><Icon name="arrow-u-up-left" size={18} /> Free returns within {store.return_window_days} days</li>
+            <li><Icon name="storefront" size={18} /> Collect in store in two hours</li>
+          </ul>
+
+          <div class="accordion">
+            <details open>
+              <summary>Description <Icon name="plus" size={16} /></summary>
+              <div class="accordion__body">
+                <p>{p.description}</p>
+                {p.details.length > 0 && <ul>{p.details.map((d) => <li>{d}</li>)}</ul>}
+              </div>
+            </details>
+            <details>
+              <summary>Composition and care <Icon name="plus" size={16} /></summary>
+              <div class="accordion__body">
+                <p><strong>Composition.</strong> {p.composition}</p>
+                <p><strong>Care.</strong> {p.care}</p>
+              </div>
+            </details>
+            <details>
+              <summary>Delivery and returns <Icon name="plus" size={16} /></summary>
+              <div class="accordion__body">
+                <p>
+                  Standard delivery in 3 to 5 working days, free over {store.free_shipping_over ? money(store.free_shipping_over, currency) : "a set amount"}. Express delivery the next
+                  working day. Collect in store for free.
+                </p>
+                <p>Send pieces back within {store.return_window_days} days of delivery, unworn and with their labels, from your account.</p>
+              </div>
+            </details>
+          </div>
+
+          {
+            inCollections.length > 0 && (
+              <p class="in-edit muted">
+                Part of {inCollections.map((c, i) => (
+                  <>
+                    {i > 0 && " and "}
+                    <a href={`/collections/${c.slug}/`}>{c.title}</a>
+                  </>
+                ))}
+                .
+              </p>
+            )
+          }
+
+          <p class="credit">
+            Photos:{" "}
+            {photographers.map((i, n) => (
+              <>
+                {n > 0 && ", "}
+                <a href={`${i.photographer_url}?utm_source=halden_template&utm_medium=referral`} rel="noopener">{i.photographer}</a>
+              </>
+            ))}{" "}
+            on <a href="https://unsplash.com/?utm_source=halden_template&utm_medium=referral" rel="noopener">Unsplash</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="section related">
+          <div class="wrap">
+            <h2>Complete the look</h2>
+            <div class="related__grid">
+              {related.map((o) => <ProductCard product={o} currency={currency} />)}
+            </div>
+          </div>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .product__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(32px, 5vw, 88px);
+    padding-top: clamp(16px, 3vw, 40px);
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .gallery__item {
+    margin: 0;
+  }
+
+  .gallery__item:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .gallery__item .photo {
+    aspect-ratio: 3 / 4;
+  }
+
+  .gallery__item:only-child .photo,
+  .gallery__item:first-child:nth-last-child(2) .photo {
+    aspect-ratio: 3 / 4;
+  }
+
+  .info__sticky {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+    display: grid;
+    gap: 22px;
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 8px;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .crumbs a {
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--ink);
+  }
+
+  .info h1 {
+    font-size: clamp(38px, 3.6vw, 56px);
+    font-weight: 400;
+  }
+
+  .info__price {
+    margin-top: -10px;
+    font-size: 18px;
+  }
+
+  .option {
+    display: grid;
+    gap: 12px;
+  }
+
+  .option__label {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 13.5px;
+  }
+
+  .colours {
+    display: flex;
+    gap: 12px;
+  }
+
+  .colour {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.14),
+      0 0 0 3px var(--paper),
+      0 0 0 3px transparent;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+
+  .colour[aria-checked="true"] {
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.14),
+      0 0 0 3px var(--paper),
+      0 0 0 4px var(--ink);
+  }
+
+  .sizes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: 6px;
+  }
+
+  .size {
+    position: relative;
+    height: 46px;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    font-size: 13px;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background-color 0.2s;
+  }
+
+  .size:hover:not(:disabled) {
+    border-color: var(--ink);
+  }
+
+  .size[aria-checked="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .size:disabled {
+    color: var(--muted);
+    cursor: not-allowed;
+    background: linear-gradient(to top right, transparent calc(50% - 0.5px), var(--line-strong) 50%, transparent calc(50% + 0.5px));
+  }
+
+  .size[data-low]::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .stock {
+    min-height: 1.4em;
+    margin-block: -8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .stock[data-tone="low"] {
+    color: var(--accent);
+  }
+
+  .add {
+    min-height: 56px;
+  }
+
+  .perks {
+    display: grid;
+    gap: 10px;
+    margin: 4px 0 0;
+    padding: 20px 0 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+
+  .perks li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .accordion {
+    border-top: 1px solid var(--line);
+  }
+
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary :global(svg) {
+    transition: transform 0.3s var(--ease);
+  }
+
+  details[open] summary :global(svg) {
+    transform: rotate(45deg);
+  }
+
+  .accordion__body {
+    display: grid;
+    gap: 10px;
+    padding-bottom: 20px;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+
+  .accordion__body ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .accordion__body strong {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .in-edit {
+    font-size: 13.5px;
+  }
+
+  .related h2 {
+    margin-bottom: clamp(28px, 4vw, 48px);
+  }
+
+  .related__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(12px, 1.6vw, 24px);
+  }
+
+  @media (max-width: 900px) {
+    .product__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .gallery {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--gutter) * -1);
+      gap: 4px;
+      scrollbar-width: none;
+    }
+
+    .gallery__item {
+      flex: 0 0 88%;
+      scroll-snap-align: center;
+    }
+
+    .info__sticky {
+      position: static;
+    }
+
+    .related__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { initProduct } from "../../scripts/product";
+  initProduct();
+</script>
