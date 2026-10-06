@@ -19,6 +19,7 @@ export function initBagPage() {
     list.innerHTML = items.map((i) => lineMarkup(i)).join("");
     const subtotal = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
     root.querySelector("[data-subtotal]")!.textContent = money(subtotal, currency);
+    showSuggestions(items);
     if (!items.length) return;
 
     const mine = ++request;
@@ -50,4 +51,15 @@ export function initBagPage() {
   bindLineControls(list);
   window.addEventListener("bag-change", (e) => render((e as CustomEvent<BagItem[]>).detail));
   render(readBag());
+}
+
+/** "You may also like": skip what is already in the bag and keep four. */
+function showSuggestions(items: BagItem[]) {
+  const inBag = new Set(items.map((i) => i.slug));
+  let shown = 0;
+  for (const el of document.querySelectorAll<HTMLElement>("[data-suggestion]")) {
+    const show = shown < 4 && !inBag.has(el.dataset.suggestion!);
+    el.hidden = !show;
+    if (show) shown++;
+  }
 }

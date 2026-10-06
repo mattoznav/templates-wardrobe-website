@@ -5,7 +5,8 @@ import ProductCard from "../components/ProductCard.astro";
 import { catalog } from "../lib/catalog";
 
 const { store, products } = await catalog();
-const suggestions = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 4);
+// Eight candidates: the page shows the first four that are not already in the bag
+const suggestions = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 8);
 ---
 
 <Base title="Your bag">
@@ -46,7 +47,13 @@ const suggestions = [...products].sort((a, b) => b.popularity - a.popularity).sl
     <div class="wrap">
       <h2 class="more">You may also like</h2>
       <div class="more__grid">
-        {suggestions.map((p) => <ProductCard product={p} currency={store.currency} />)}
+        {
+          suggestions.map((p, i) => (
+            <div data-suggestion={p.slug} hidden={i >= 4}>
+              <ProductCard product={p} currency={store.currency} />
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
