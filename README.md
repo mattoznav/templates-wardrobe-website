@@ -68,3 +68,7 @@ Product and editorial photos are from [Unsplash](https://unsplash.com), under th
 ## Credits
 
 Fonts: Cormorant Garamond and Instrument Sans (SIL Open Font License). Icons: [Phosphor](https://phosphoricons.com) (MIT).
+
+## License
+
+The code is released under the [MIT License](LICENSE). Product photos are not part of the repository: they are loaded from Unsplash under the [Unsplash License](https://unsplash.com/license).
