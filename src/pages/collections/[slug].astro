@@ -4,6 +4,7 @@ import ProductCard from "../../components/ProductCard.astro";
 import { catalog } from "../../lib/catalog";
 import { img, srcset } from "../../lib/image";
 import type { Collection } from "../../lib/types";
+import { withBase } from "../../lib/paths";
 
 export async function getStaticPaths() {
   const { collections } = await catalog();
@@ -48,7 +49,7 @@ const others = collections.filter((o) => o.slug !== c.slug);
       <div class="others">
         {
           others.map((o) => (
-            <a href={`/collections/${o.slug}/`} class="other">
+            <a href={withBase(`/collections/${o.slug}/`)} class="other">
               <span class="other__title">{o.title}</span>
               <span class="muted">{o.subtitle}</span>
             </a>

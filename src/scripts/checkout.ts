@@ -26,6 +26,7 @@ import { img } from "../lib/image";
 import type { Order } from "../lib/types";
 import { initAuthForms } from "./auth-form";
 import { esc } from "./html";
+import { withBase } from "../lib/paths";
 
 const CONFIRM_TIMEOUT_MS = 45_000;
 const ADDRESS_KEY = "wardrobe.address";
@@ -318,7 +319,7 @@ async function finish(latest?: Order) {
   order = latest ?? (await getOrder(order!.id));
   clearBag();
   $("[data-reference]").textContent = order.reference;
-  $<HTMLAnchorElement>("[data-order-link]").href = `/account/?order=${order.id}`;
+  $<HTMLAnchorElement>("[data-order-link]").href = withBase(`/account/?order=${order.id}`);
   show("done");
 }
 

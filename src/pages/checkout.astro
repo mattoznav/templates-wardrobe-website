@@ -4,6 +4,7 @@ import AuthForm from "../components/AuthForm.astro";
 import Icon from "../components/Icon.astro";
 import { catalog } from "../lib/catalog";
 import { deliveryWindow, money } from "../lib/format";
+import { withBase } from "../lib/paths";
 
 const { store, shipping } = await catalog();
 ---
@@ -11,7 +12,7 @@ const { store, shipping } = await catalog();
 <Base title="Checkout">
   <section class="wrap checkout" data-checkout-page data-country={store.country}>
     <header class="checkout__head">
-      <a class="back" href="/bag/"><Icon name="arrow-left" size={16} /> Back to bag</a>
+      <a class="back" href={withBase("/bag/")}><Icon name="arrow-left" size={16} /> Back to bag</a>
       <h1>Checkout</h1>
     </header>
 
@@ -133,8 +134,8 @@ const { store, shipping } = await catalog();
         We have your order and will send it within one working day. You can follow it, cancel it before it ships and request a return from your account.
       </p>
       <div class="state__cta">
-        <a class="btn btn--solid" data-order-link href="/account/">View your order</a>
-        <a class="btn" href="/shop/">Keep shopping</a>
+        <a class="btn btn--solid" data-order-link href={withBase("/account/")}>View your order</a>
+        <a class="btn" href={withBase("/shop/")}>Keep shopping</a>
       </div>
     </div>
 
@@ -143,13 +144,13 @@ const { store, shipping } = await catalog();
       <h2 data-error-title>Something went wrong</h2>
       <p class="lede" data-error-text></p>
       <div class="state__cta">
-        <a class="btn btn--solid" href="/bag/">Back to bag</a>
+        <a class="btn btn--solid" href={withBase("/bag/")}>Back to bag</a>
       </div>
     </div>
 
     <div class="state" data-step="empty" hidden>
       <h2>Your bag is empty</h2>
-      <div class="state__cta"><a class="btn" href="/shop/">Discover the collection</a></div>
+      <div class="state__cta"><a class="btn" href={withBase("/shop/")}>Discover the collection</a></div>
     </div>
   </section>
 </Base>

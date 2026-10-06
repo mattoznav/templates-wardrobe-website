@@ -5,6 +5,7 @@
  */
 import Icon from "./Icon.astro";
 import type { Store } from "../lib/types";
+import { withBase } from "../lib/paths";
 
 interface Props {
   store: Store;
@@ -28,7 +29,7 @@ const { store } = Astro.props;
       <ul class="drawer__lines" data-drawer-lines></ul>
       <div class="drawer__empty" data-drawer-empty>
         <p>Your bag is empty.</p>
-        <a class="link" href="/shop/">Discover the collection</a>
+        <a class="link" href={withBase("/shop/")}>Discover the collection</a>
       </div>
     </div>
 
@@ -46,8 +47,8 @@ const { store } = Astro.props;
         <span class="price" data-drawer-subtotal></span>
       </div>
       <p class="muted drawer__small">Shipping and final prices are confirmed at checkout.</p>
-      <a class="btn btn--solid btn--block" href="/checkout/">Checkout</a>
-      <a class="btn btn--block" href="/bag/">View bag</a>
+      <a class="btn btn--solid btn--block" href={withBase("/checkout/")}>Checkout</a>
+      <a class="btn btn--block" href={withBase("/bag/")}>View bag</a>
     </footer>
   </aside>
 </div>

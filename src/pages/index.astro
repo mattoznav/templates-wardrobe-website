@@ -6,6 +6,7 @@ import Icon from "../components/Icon.astro";
 import { catalog } from "../lib/catalog";
 import { country } from "../lib/format";
 import { img, srcset } from "../lib/image";
+import { withBase } from "../lib/paths";
 
 const { store, editorial: ed, products, collections } = await catalog();
 const currency = store.currency;
@@ -30,8 +31,8 @@ const heroAlt = ed["home-hero-alt"];
         <h1>Made slowly.<br /><em>Worn for years.</em></h1>
         <p class="lede">{hero.text}</p>
         <div class="hero__cta">
-          <a class="btn btn--solid" href="/shop/?section=women">Shop women</a>
-          <a class="btn" href="/shop/?section=men">Shop men</a>
+          <a class="btn btn--solid" href={withBase("/shop/?section=women")}>Shop women</a>
+          <a class="btn" href={withBase("/shop/?section=men")}>Shop men</a>
         </div>
       </div>
       <div class="hero__images">
@@ -62,7 +63,7 @@ const heroAlt = ed["home-hero-alt"];
           <span class="eyebrow">Just arrived</span>
           <h2>New in</h2>
         </div>
-        <a class="link" href="/shop/?new=1">View all <Icon name="arrow-right" size={14} /></a>
+        <a class="link" href={withBase("/shop/?new=1")}>View all <Icon name="arrow-right" size={14} /></a>
       </header>
       <div class="rail">
         {newIn.map((p) => <ProductCard product={p} currency={currency} sizes="(max-width: 760px) 70vw, 24vw" />)}
@@ -74,7 +75,7 @@ const heroAlt = ed["home-hero-alt"];
     <div class="wrap departments__grid">
       {
         departments.map((d) => (
-          <a class="dept" href={d.href}>
+          <a class="dept" href={withBase(d.href)}>
             <div class="dept__photo photo">
               <img src={img(d.image.url, 700, 980)} srcset={srcset(d.image.url, [420, 700, 1000], 5 / 7)} sizes="(max-width: 760px) 92vw, 31vw" alt={d.alt} loading="lazy" />
             </div>
@@ -101,7 +102,7 @@ const heroAlt = ed["home-hero-alt"];
         <div class="feature__products">
           {featuredProducts.map((p) => <ProductCard product={p} currency={currency} sizes="(max-width: 900px) 46vw, 18vw" />)}
         </div>
-        <a class="btn" href={`/collections/${featured.slug}/`}>Explore the edit</a>
+        <a class="btn" href={withBase(`/collections/${featured.slug}/`)}>Explore the edit</a>
       </div>
     </div>
   </section>
@@ -114,7 +115,7 @@ const heroAlt = ed["home-hero-alt"];
       <span class="eyebrow">Our knitwear</span>
       <h2>{ed.knitwear.title}</h2>
       <p>{ed.knitwear.text}</p>
-      <a class="btn btn--light" href="/shop/?category=knitwear">Shop knitwear</a>
+      <a class="btn btn--light" href={withBase("/shop/?category=knitwear")}>Shop knitwear</a>
       <p class="credit">Photo: <a href={ed.knitwear.image.source_url}>{ed.knitwear.image.photographer}</a> on Unsplash</p>
     </div>
   </section>
@@ -126,12 +127,12 @@ const heroAlt = ed["home-hero-alt"];
           <span class="eyebrow">Collections</span>
           <h2>Edits for the season</h2>
         </div>
-        <a class="link" href="/collections/">All collections <Icon name="arrow-right" size={14} /></a>
+        <a class="link" href={withBase("/collections/")}>All collections <Icon name="arrow-right" size={14} /></a>
       </header>
       <div class="edits__grid">
         {
           collections.map((c, i) => (
-            <a class="edit" href={`/collections/${c.slug}/`}>
+            <a class="edit" href={withBase(`/collections/${c.slug}/`)}>
               <div class="edit__photo photo">
                 <img src={img(c.image.url, 600, 800)} srcset={srcset(c.image.url, [360, 600, 900], 3 / 4)} sizes="(max-width: 760px) 46vw, 23vw" alt={c.alt} loading="lazy" />
               </div>
@@ -151,7 +152,7 @@ const heroAlt = ed["home-hero-alt"];
         <span class="eyebrow">The atelier</span>
         <h2>{ed.atelier.title}</h2>
         <p class="lede">{ed.atelier.text}</p>
-        <a class="link" href="/about/">How we work <Icon name="arrow-right" size={14} /></a>
+        <a class="link" href={withBase("/about/")}>How we work <Icon name="arrow-right" size={14} /></a>
       </div>
       <Picture photo={ed.atelier.image} alt={ed.atelier.alt} ratio={4 / 5} sizes="(max-width: 900px) 92vw, 40vw" credit />
     </div>
@@ -174,7 +175,7 @@ const heroAlt = ed["home-hero-alt"];
             <dd>{store.opening_hours}</dd>
           </div>
         </dl>
-        <a class="btn" href="/store/">Plan a visit</a>
+        <a class="btn" href={withBase("/store/")}>Plan a visit</a>
       </div>
     </div>
   </section>

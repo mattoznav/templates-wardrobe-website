@@ -1,0 +1,76 @@
+# Builds the static showcase and publishes it on GitHub Pages: at every push to
+# main, once a day (so the catalogue follows the backend's data) and on demand.
+# The backend runs inside the job only to serve the catalogue to the build; the
+# published site simulates it in the browser (PUBLIC_SHOWCASE, see the README).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: mattoznav/templates-wardrobe-backend
+          path: backend
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Start the backend
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          cp .env.example .env
+          # A fresh catalogue from data/*.csv; demo orders only matter to the back office
+          python manage.py bootstrap --no-demo-orders
+          python manage.py runserver 8001 > ../backend.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:8001/api/health/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat ../backend.log
+          exit 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: npm run build
+        env:
+          PUBLIC_API_URL: http://localhost:8001/api
+          PUBLIC_SHOWCASE: "true"
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

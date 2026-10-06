@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import Icon from "../components/Icon.astro";
 import ProductCard from "../components/ProductCard.astro";
 import { DEPARTMENTS, catalog, sectionOf } from "../lib/catalog";
+import { withBase } from "../lib/paths";
 
 const { store, products, categories, colours, sizes } = await catalog();
 
@@ -26,8 +27,8 @@ const categoriesBySection = Object.fromEntries(
       </header>
 
       <nav class="tabs" aria-label="Section">
-        <a href="/shop/" data-section-tab="">All</a>
-        {DEPARTMENTS.map((d) => <a href={`/shop/?section=${d.slug}`} data-section-tab={d.slug}>{d.name}</a>)}
+        <a href={withBase("/shop/")} data-section-tab="">All</a>
+        {DEPARTMENTS.map((d) => <a href={withBase(`/shop/?section=${d.slug}`)} data-section-tab={d.slug}>{d.name}</a>)}
       </nav>
 
       <div class="bar">

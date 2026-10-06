@@ -1,0 +1,71 @@
+---
+/**
+ * Shown only in showcase builds (PUBLIC_SHOWCASE=true): the static demo has
+ * no backend, so visitors are told where their data goes.
+ */
+import Icon from "./Icon.astro";
+
+const SOURCE = "https://github.com/mattoznav/templates-wardrobe";
+---
+
+<aside class="showcase" aria-label="About this demo">
+  <p>
+    <Icon name="info" size={14} />
+    <span>
+      <strong>Static showcase.</strong>{" "}
+      <span class="showcase__wide">Accounts and orders are kept only in this browser and no payment is taken.</span>
+      <span class="showcase__narrow">Data stays in this browser, no payment taken.</span>
+    </span>{" "}
+    <a href={SOURCE} rel="noopener">Source on GitHub</a>
+  </p>
+</aside>
+
+<style>
+  .showcase {
+    background: var(--paper-sunken);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .showcase p {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 6px 16px;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .showcase :global(svg) {
+    margin-right: 4px;
+    vertical-align: -2px;
+    color: var(--muted);
+  }
+
+  .showcase strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .showcase a {
+    margin-left: 6px;
+    color: var(--ink);
+    text-underline-offset: 3px;
+    white-space: nowrap;
+  }
+
+  .showcase__narrow {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .showcase__wide {
+      display: none;
+    }
+
+    .showcase__narrow {
+      display: inline;
+    }
+  }
+</style>

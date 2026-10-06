@@ -3,10 +3,18 @@
  *
  * Tokens are kept in localStorage for simplicity. For production, consider
  * moving the refresh token to an httpOnly cookie set by the backend.
+ *
+ * In showcase mode (PUBLIC_SHOWCASE=true, used for the static demo on GitHub
+ * Pages) there is no backend: requests go to an in-browser stand-in,
+ * src/lib/showcase.ts, which is only downloaded in that mode.
  */
 import type { Order, Paginated, Product, Quote, ReturnRequest } from "./types";
 
-export const API_URL = (import.meta.env.PUBLIC_API_URL ?? "http://localhost:8001/api").replace(/\/$/, "");
+export const SHOWCASE = import.meta.env.PUBLIC_SHOWCASE === "true";
+export const API_URL = SHOWCASE ? "" : (import.meta.env.PUBLIC_API_URL ?? "http://localhost:8001/api").replace(/\/$/, "");
+
+const request = (url: string, init: RequestInit): Promise<Response> =>
+  SHOWCASE ? import("./showcase").then((showcase) => showcase.respond(url, init)) : fetch(url, init);
 const STORAGE_KEY = "wardrobe.auth";
 
 interface Tokens {
@@ -61,7 +69,7 @@ export function isSignedIn(): boolean {
 }
 
 async function refreshAccess(tokens: Tokens): Promise<Tokens | null> {
-  const res = await fetch(`${API_URL}/auth/token/refresh/`, {
+  const res = await request(`${API_URL}/auth/token/refresh/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh: tokens.refresh }),
@@ -74,7 +82,7 @@ async function refreshAccess(tokens: Tokens): Promise<Tokens | null> {
 
 export async function api<T>(path: string, options: { method?: string; body?: unknown; auth?: boolean } = {}): Promise<T> {
   const send = (tokens: Tokens | null) =>
-    fetch(`${API_URL}${path}`, {
+    request(`${API_URL}${path}`, {
       method: options.method ?? "GET",
       headers: {
         Accept: "application/json",

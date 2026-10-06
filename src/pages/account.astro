@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import AuthForm from "../components/AuthForm.astro";
 import Icon from "../components/Icon.astro";
 import { catalog } from "../lib/catalog";
+import { withBase } from "../lib/paths";
 
 const { store } = await catalog();
 ---
@@ -37,7 +38,7 @@ const { store } = await catalog();
       <div data-panel="orders">
         <div class="orders" data-orders></div>
         <p class="empty" data-orders-empty hidden>
-          No orders yet. <a href="/shop/">Discover the collection</a>
+          No orders yet. <a href={withBase("/shop/")}>Discover the collection</a>
         </p>
       </div>
 

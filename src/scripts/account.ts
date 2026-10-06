@@ -5,6 +5,7 @@ import { img } from "../lib/image";
 import type { Order, ReturnRequest } from "../lib/types";
 import { initAuthForms } from "./auth-form";
 import { esc } from "./html";
+import { withBase } from "../lib/paths";
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
@@ -86,8 +87,8 @@ function renderOrder(o: Order) {
       <ul class="order__lines">${o.lines
         .map(
           (l) => `<li>
-            <a class="photo" href="/products/${esc(l.product_slug)}/">${l.image_url ? `<img src="${img(l.image_url, 160, 214)}" alt="" />` : ""}</a>
-            <div><a href="/products/${esc(l.product_slug)}/">${esc(l.product_name)}</a><p class="muted">${esc(l.colour)} · ${esc(l.size)} · Qty ${l.quantity}</p></div>
+            <a class="photo" href="${withBase(`/products/${esc(l.product_slug)}/`)}">${l.image_url ? `<img src="${img(l.image_url, 160, 214)}" alt="" />` : ""}</a>
+            <div><a href="${withBase(`/products/${esc(l.product_slug)}/`)}">${esc(l.product_name)}</a><p class="muted">${esc(l.colour)} · ${esc(l.size)} · Qty ${l.quantity}</p></div>
             <span class="price">${money(l.line_total, o.currency)}</span>
           </li>`,
         )
@@ -109,7 +110,7 @@ function renderOrder(o: Order) {
             : ""
         }
         <div class="order__actions">
-          ${pending ? `<a class="btn btn--solid btn--block" href="/checkout/?order=${o.id}">Complete payment</a>` : ""}
+          ${pending ? `<a class="btn btn--solid btn--block" href="${withBase(`/checkout/?order=${o.id}`)}">Complete payment</a>` : ""}
           ${o.can_return ? `<button type="button" class="btn btn--block" data-start-return>Return pieces</button>` : ""}
           ${o.can_return && o.return_deadline ? `<p class="muted">Returns open until ${longDate(o.return_deadline)}.</p>` : ""}
           ${o.can_cancel ? `<button type="button" class="text-link" data-cancel>Cancel this order</button>` : ""}

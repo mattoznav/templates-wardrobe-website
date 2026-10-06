@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import { withBase } from "../lib/paths";
 ---
 
 <Base title="Page not found">
@@ -8,8 +9,8 @@ import Base from "../layouts/Base.astro";
     <h1>This page has <em>moved on.</em></h1>
     <p class="lede">The piece or page you are looking for is no longer here. It may have sold out, or the link may be out of date.</p>
     <div class="missing__cta">
-      <a class="btn btn--solid" href="/shop/">Shop the collection</a>
-      <a class="btn" href="/">Home</a>
+      <a class="btn btn--solid" href={withBase("/shop/")}>Shop the collection</a>
+      <a class="btn" href={withBase("/")}>Home</a>
     </div>
   </section>
 </Base>

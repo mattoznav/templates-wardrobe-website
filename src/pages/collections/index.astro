@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import { catalog } from "../../lib/catalog";
 import { img, srcset } from "../../lib/image";
+import { withBase } from "../../lib/paths";
 
 const { collections } = await catalog();
 ---
@@ -17,7 +18,7 @@ const { collections } = await catalog();
     <div class="list">
       {
         collections.map((c, i) => (
-          <a class:list={["item", { "item--flip": i % 2 === 1 }]} href={`/collections/${c.slug}/`} data-reveal>
+          <a class:list={["item", { "item--flip": i % 2 === 1 }]} href={withBase(`/collections/${c.slug}/`)} data-reveal>
             <div class="item__photo photo">
               <img
                 src={img(c.image.url, 1000, 1250)}

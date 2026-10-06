@@ -3,17 +3,18 @@ import { bagCount, readBag, removeFromBag, setQuantity, type BagItem } from "../
 import { money } from "../lib/format";
 import { img } from "../lib/image";
 import { esc } from "./html";
+import { withBase } from "../lib/paths";
 
 const currency = () => document.documentElement.dataset.currency ?? "EUR";
 
 export function lineMarkup(item: BagItem): string {
   return `
     <li class="bag-line" data-variant="${item.variant}">
-      <a class="bag-line__photo photo" href="/products/${esc(item.slug)}/">
+      <a class="bag-line__photo photo" href="${withBase(`/products/${esc(item.slug)}/`)}">
         ${item.image ? `<img src="${img(item.image, 180, 240)}" alt="" loading="lazy" width="90" height="120" />` : ""}
       </a>
       <div class="bag-line__info">
-        <a class="bag-line__name" href="/products/${esc(item.slug)}/">${esc(item.name)}</a>
+        <a class="bag-line__name" href="${withBase(`/products/${esc(item.slug)}/`)}">${esc(item.name)}</a>
         <p class="bag-line__meta">${esc(item.colour)} · ${esc(item.size)}</p>
         <div class="bag-line__qty" aria-label="Quantity">
           <button type="button" data-qty="-1" aria-label="One less">−</button>
@@ -104,7 +105,7 @@ export function initBagUi() {
   renderCount(items);
 
   // On the bag and checkout pages the header button goes to the page instead
-  const onBagPage = /^\/(bag|checkout)\//.test(location.pathname);
+  const onBagPage = [withBase("/bag/"), withBase("/checkout/")].some((p) => location.pathname.startsWith(p));
   document.querySelectorAll<HTMLElement>("[data-bag-open]").forEach((el) =>
     el.addEventListener("click", (e) => {
       if (onBagPage) return;
@@ -135,7 +136,7 @@ export function initBagUi() {
 
   // Mark the shop section in the header (query strings are not known at build time)
   const section = new URLSearchParams(location.search).get("section");
-  if (location.pathname.startsWith("/shop") && section) {
+  if (location.pathname.startsWith(withBase("/shop")) && section) {
     document.querySelectorAll<HTMLAnchorElement>(".header__nav a").forEach((a) => {
       if (a.href.endsWith(`section=${section}`)) a.setAttribute("aria-current", "page");
     });

@@ -6,6 +6,7 @@ import { catalog, DEPARTMENTS, sectionOf } from "../../lib/catalog";
 import { money } from "../../lib/format";
 import { img, srcset } from "../../lib/image";
 import type { Product } from "../../lib/types";
+import { withBase } from "../../lib/paths";
 
 export async function getStaticPaths() {
   const { products } = await catalog();
@@ -57,9 +58,9 @@ const singleSize = p.sizes.length === 1 && p.sizes[0].code === "one-size";
       <div class="info">
         <div class="info__sticky">
           <nav class="crumbs" aria-label="Breadcrumb">
-            <a href={`/shop/?section=${section}`}>{sectionName}</a>
+            <a href={withBase(`/shop/?section=${section}`)}>{sectionName}</a>
             <span aria-hidden="true">/</span>
-            <a href={`/shop/?section=${section}&category=${p.category}`}>{p.category_name}</a>
+            <a href={withBase(`/shop/?section=${section}&category=${p.category}`)}>{p.category_name}</a>
           </nav>
 
           <h1>{p.name}</h1>
@@ -165,7 +166,7 @@ const singleSize = p.sizes.length === 1 && p.sizes[0].code === "one-size";
                 Part of {inCollections.map((c, i) => (
                   <>
                     {i > 0 && " and "}
-                    <a href={`/collections/${c.slug}/`}>{c.title}</a>
+                    <a href={withBase(`/collections/${c.slug}/`)}>{c.title}</a>
                   </>
                 ))}
                 .

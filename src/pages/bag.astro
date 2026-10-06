@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import Icon from "../components/Icon.astro";
 import ProductCard from "../components/ProductCard.astro";
 import { catalog } from "../lib/catalog";
+import { withBase } from "../lib/paths";
 
 const { store, products } = await catalog();
 // Eight candidates: the page shows the first four that are not already in the bag
@@ -29,7 +30,7 @@ const suggestions = [...products].sort((a, b) => b.popularity - a.popularity).sl
           <div class="summary__total"><dt>Total</dt><dd class="price" data-total></dd></div>
         </dl>
         <ul class="problems" data-problems hidden></ul>
-        <a class="btn btn--solid btn--block" href="/checkout/" data-checkout>Checkout</a>
+        <a class="btn btn--solid btn--block" href={withBase("/checkout/")} data-checkout>Checkout</a>
         <ul class="perks">
           <li><Icon name="truck" size={18} /> Express and collect in store at checkout</li>
           <li><Icon name="arrow-u-up-left" size={18} /> Free returns within {store.return_window_days} days</li>
@@ -39,7 +40,7 @@ const suggestions = [...products].sort((a, b) => b.popularity - a.popularity).sl
 
     <div class="empty" data-bag-empty hidden>
       <p>Your bag is empty.</p>
-      <a class="btn" href="/shop/">Discover the collection</a>
+      <a class="btn" href={withBase("/shop/")}>Discover the collection</a>
     </div>
   </section>
 

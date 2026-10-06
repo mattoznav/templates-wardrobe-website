@@ -1,6 +1,7 @@
 ---
 import { country } from "../lib/format";
 import type { Store } from "../lib/types";
+import { withBase } from "../lib/paths";
 
 interface Props {
   store: Store;
@@ -18,17 +19,17 @@ const year = new Date().getFullYear();
     <div class="footer__grid">
       <div>
         <span class="eyebrow">Shop</span>
-        <a href="/shop/?section=women">Women</a>
-        <a href="/shop/?section=men">Men</a>
-        <a href="/shop/?section=accessories">Accessories</a>
-        <a href="/shop/?new=1">New in</a>
-        <a href="/collections/">Collections</a>
+        <a href={withBase("/shop/?section=women")}>Women</a>
+        <a href={withBase("/shop/?section=men")}>Men</a>
+        <a href={withBase("/shop/?section=accessories")}>Accessories</a>
+        <a href={withBase("/shop/?new=1")}>New in</a>
+        <a href={withBase("/collections/")}>Collections</a>
       </div>
       <div>
         <span class="eyebrow">Help</span>
-        <a href="/account/">Orders and returns</a>
-        <a href="/about/#care">Caring for your clothes</a>
-        <a href="/store/#services">Delivery and collection</a>
+        <a href={withBase("/account/")}>Orders and returns</a>
+        <a href={withBase("/about/#care")}>Caring for your clothes</a>
+        <a href={withBase("/store/#services")}>Delivery and collection</a>
         <a href={`mailto:${store.email}`}>{store.email}</a>
       </div>
       <div>
@@ -42,8 +43,8 @@ const year = new Date().getFullYear();
       </div>
       <div>
         <span class="eyebrow">About</span>
-        <a href="/about/">The atelier</a>
-        <a href="/store/">Visit the store</a>
+        <a href={withBase("/about/")}>The atelier</a>
+        <a href={withBase("/store/")}>Visit the store</a>
         <p class="muted footer__note">
           Photographs from <a href="https://unsplash.com" rel="noopener">Unsplash</a>, credited on every page where they appear.
         </p>

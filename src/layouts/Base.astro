@@ -3,8 +3,10 @@ import "../styles/global.css";
 import BagDrawer from "../components/BagDrawer.astro";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import ShowcaseNotice from "../components/ShowcaseNotice.astro";
 import { catalog } from "../lib/catalog";
 import { img } from "../lib/image";
+import { withBase } from "../lib/paths";
 
 interface Props {
   title?: string;
@@ -14,6 +16,7 @@ interface Props {
 
 const { store } = await catalog();
 const { title, description = store.tagline, image } = Astro.props;
+const showcase = import.meta.env.PUBLIC_SHOWCASE === "true";
 const pageTitle = title ? `${title} | ${store.name}` : `${store.name}: ${store.tagline}`;
 ---
 
@@ -24,7 +27,7 @@ const pageTitle = title ? `${title} | ${store.name}` : `${store.name}: ${store.t
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <meta name="theme-color" content="#f6f2eb" />
     <meta property="og:title" content={pageTitle} />
@@ -36,6 +39,7 @@ const pageTitle = title ? `${title} | ${store.name}` : `${store.name}: ${store.t
   </head>
   <body>
     <a class="visually-hidden" href="#main">Skip to content</a>
+    {showcase && <ShowcaseNotice />}
     <Header store={store} />
     <main id="main">
       <slot />

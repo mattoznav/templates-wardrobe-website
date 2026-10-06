@@ -2,6 +2,7 @@
 import Icon from "./Icon.astro";
 import { money } from "../lib/format";
 import type { Store } from "../lib/types";
+import { withBase } from "../lib/paths";
 
 interface Props {
   store: Store;
@@ -40,27 +41,27 @@ const right = [
     <nav class="header__nav" aria-label="Shop">
       {
         left.map((l) => (
-          <a href={l.href} aria-current={path.startsWith("/collections") && l.key === "collections" ? "page" : section === l.key ? "page" : undefined}>
+          <a href={withBase(l.href)} aria-current={path.startsWith(withBase("/collections")) && l.key === "collections" ? "page" : section === l.key ? "page" : undefined}>
             {l.label}
           </a>
         ))
       }
     </nav>
 
-    <a href="/" class="header__logo" aria-label={`${store.name}, home`}>{store.name}</a>
+    <a href={withBase("/")} class="header__logo" aria-label={`${store.name}, home`}>{store.name}</a>
 
     <div class="header__tools">
       {
         right.map((l) => (
-          <a href={l.href} class="header__text" aria-current={path.startsWith(l.href) ? "page" : undefined}>
+          <a href={withBase(l.href)} class="header__text" aria-current={path.startsWith(withBase(l.href)) ? "page" : undefined}>
             {l.label}
           </a>
         ))
       }
-      <a href="/account/" class="header__icon" aria-label="Account" title="Account" data-account-link>
+      <a href={withBase("/account/")} class="header__icon" aria-label="Account" title="Account" data-account-link>
         <Icon name="user" size={21} />
       </a>
-      <a href="/bag/" class="header__bag" data-bag-open aria-label="Bag">
+      <a href={withBase("/bag/")} class="header__bag" data-bag-open aria-label="Bag">
         <Icon name="bag-simple" size={21} />
         <span class="header__count" data-bag-count>0</span>
       </a>
@@ -69,7 +70,7 @@ const right = [
 
   <nav class="mobile-nav" id="mobile-nav" aria-label="Menu" data-mobile-nav hidden>
     <div class="wrap">
-      {[...left, ...right, { href: "/account/", label: "Account" }].map((l) => <a href={l.href}>{l.label}</a>)}
+      {[...left, ...right, { href: "/account/", label: "Account" }].map((l) => <a href={withBase(l.href)}>{l.label}</a>)}
     </div>
   </nav>
 </header>

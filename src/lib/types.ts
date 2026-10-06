@@ -207,3 +207,21 @@ export interface ReturnRequest {
   created_at: string;
   closed_at: string | null;
 }
+
+/** Showcase mode only: what the in-browser backend needs, written at build time (src/pages/showcase/). */
+export interface Snapshot {
+  store: Store;
+  shipping: ShippingMethod[];
+  colours: Record<string, string>;
+  sizes: Record<string, string>;
+  products: {
+    slug: string;
+    name: string;
+    price: string;
+    compare_at_price: string | null;
+    /** [id, sku, colour, size, stock] */
+    variants: [number, string, string, string, number][];
+    /** Colour slug to photo URL; "" is the product's first photo */
+    images: Record<string, string>;
+  }[];
+}
